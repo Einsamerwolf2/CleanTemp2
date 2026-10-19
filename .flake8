@@ -1,0 +1,2 @@
+[flake8]
+exclude = .git,.venv,.tools,build,dist,tmp,output

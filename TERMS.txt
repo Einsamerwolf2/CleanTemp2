@@ -1,0 +1,34 @@
+CleanTemp - Termos e condições de uso
+Versão dos termos: 1.0 - 12 de outubro de 2026
+Criador: Edilson Enoque
+
+1. Aceitação
+Leia estes termos antes de instalar. Se concordar, selecione "Aceito" no instalador. Se não concordar, cancele a instalação. Em instalações automatizadas, o responsável deve ter lido e aceitado estes termos antes de usar a opção explícita de aceitação.
+
+2. Finalidade e escolha do usuário
+O CleanTemp ajuda a localizar e excluir arquivos temporários em locais previamente definidos. Analisar não apaga arquivos. A limpeza depende da seleção e da confirmação do usuário. A exclusão é permanente e não passa pela Lixeira. Faça cópias dos dados importantes e não use a aplicação para limpar locais que não reconhece.
+
+3. Proteções e limites
+O CleanTemp procura preservar pastas, arquivos abertos, protegidos e arquivos que não possam ser verificados. Essas proteções não garantem que um arquivo fechado nunca mais será necessário a outro programa. Não force exclusões, não altere permissões de arquivos e não pare serviços para conseguir limpar. Algumas opções ficam indisponíveis por segurança.
+
+4. Permissões
+O instalador solicita autorização do Windows para instalar em Program Files. O CleanTemp abre normalmente, sem exigir administrador para a limpeza do usuário. A instalação não autoriza apagar arquivos do sistema. Operações sem permissão são ignoradas. A autorização pontual é opcional e limitada aos temporários do Windows no aplicativo instalado na pasta padrão. O Windows solicita aprovação e a janela auxiliar confirma a exclusão permanente. Cancelar não inicia limpeza adicional. Mesmo com autorização, arquivos abertos, protegidos e não verificados são preservados. O agendamento não solicita privilégios superiores.
+
+5. Funcionamento e conexão
+A instalação contém as dependências necessárias. A análise, a limpeza, o passeio de ajuda e o guia em PDF funcionam offline. A consulta de atualizações e os canais externos de suporte precisam de internet. O aplicativo apenas avisa sobre novas versões; não instala atualizações automaticamente.
+
+6. Privacidade e suporte
+Não é necessário criar conta. A consulta de versões acessa o GitHub, que recebe os dados normais de uma conexão, como endereço IP; ela não envia a lista dos arquivos analisados. Hist?rico de limpezas e prefer?ncias ficam somente no computador. O hist?rico n?o guarda nomes dos arquivos eliminados. A consulta autom?tica de vers?es pode ser desativada na Ajuda. Histórico e preferências ficam neste computador. O histórico não guarda nomes de arquivos. A consulta automática pode ser desativada na Ajuda. Registros locais de falhas podem conter caminhos e mensagens de erro e não são enviados automaticamente. Ao pedir ajuda, revise qualquer imagem ou relato antes de compartilhá-lo. Nunca envie senhas, tokens ou documentos pessoais. Os canais de suporte ainda não configurados mostram "Em desenvolvimento".
+
+7. Código aberto e direitos
+O código do CleanTemp é disponibilizado sob a licença MIT, incluída no aplicativo. Estes termos explicam seu uso e não restringem os direitos de copiar, modificar e distribuir concedidos pela MIT. As dependências têm licenças próprias, também incluídas no pacote. Os direitos obrigatórios previstos na legislação aplicável permanecem preservados.
+
+8. Garantia e responsabilidade
+Conforme a licença MIT e na medida permitida pela legislação aplicável, o software é fornecido sem garantia de funcionamento ininterrupto ou de recuperação de arquivos excluídos. Não existe promessa de eliminar todos os temporários nem de resolver problemas do Windows.
+
+9. Projeto e assistência
+Repositório oficial: https://github.com/Einsamerwolf2/CleanTemp2
+Relatos de problemas: https://github.com/Einsamerwolf2/CleanTemp2/issues
+Consulte o guia de primeiros passos para preparar um pedido de assistência.
+
+Limpeza automática: opcional e autorizada expressamente pelo usuário. Apaga os temporários pessoais selecionados diariamente no horário escolhido, sem nova confirmação. Exige computador ligado e usuário conectado. Pode ser desativada a qualquer momento. O desinstalador remove tarefas vinculadas a esta instalação.

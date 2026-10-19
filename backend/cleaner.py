@@ -1,7 +1,8 @@
-﻿from pathlib import Path
+from pathlib import Path
 import os
 import stat
 import time
+from safe_delete import PreservedError, category_for, delete_file
 
 
 def targets():
@@ -37,29 +38,34 @@ def linked(path):
 def checked_root(item):
     root = Path(item['path'])
     if not root.is_absolute() or root == Path(root.anchor):
-        raise OSError('Caminho inválido')
+        raise PreservedError('safety', 'Caminho inválido')
     for part in (root, *root.parents):
         if linked(part):
-            raise OSError('Links e junções não são permitidos')
+            raise PreservedError('safety', 'Links e junções não são permitidos')
     if not root.is_dir():
-        raise OSError('Pasta não encontrada')
+        raise FileNotFoundError('Pasta não encontrada')
     return root
 
 
-def files(item, errors):
+def files(item, errors, cancel=None):
     root = checked_root(item)
     stack = [root]
     cutoff = time.time() - 24 * 3600
     while stack:
+        if cancel is not None and cancel.is_set():
+            return
         directory = stack.pop()
         try:
             children = list(directory.iterdir())
-        except OSError:
-            errors.append(str(directory))
+        except OSError as exc:
+            errors.append(category_for(exc))
             continue
         for child in children:
+            if cancel is not None and cancel.is_set():
+                return
             try:
                 if linked(child):
+                    errors.append('safety')
                     continue
                 if child.is_dir():
                     if item['id'] != 'explorer':
@@ -69,32 +75,59 @@ def files(item, errors):
                         continue
                     if child.stat().st_mtime < cutoff:
                         yield child
-            except OSError:
-                errors.append(str(child))
+                    else:
+                        errors.append('recent')
+            except OSError as exc:
+                errors.append(category_for(exc))
 
 
-def inspect(item, clean=False):
-    result = dict(item, exists=Path(item['path']).is_dir(), size_bytes=0, file_count=0, skipped=0)
+def inspect(item, clean=False, cancel=None):
+    result = dict(item, exists=Path(item['path']).is_dir(), size_bytes=0,
+                  file_count=0, skipped=0,
+                  preserved={key: 0 for key in PRESERVATION_LABELS})
     if not item['enabled']:
         return result
     errors = []
     try:
-        for path in files(item, errors):
+        for path in files(item, errors, cancel=None if clean else cancel):
             try:
                 # Validate containment and every ancestor again immediately before deletion.
                 root = checked_root(item)
                 path.relative_to(root)
                 if any(linked(p) for p in (path, *path.parents)):
+                    errors.append('safety')
                     continue
                 size = path.stat().st_size
                 if clean:
-                    path.unlink()
+                    size = delete_file(path)
                 result['size_bytes'] += size
                 result['file_count'] += 1
-            except OSError:
-                errors.append(str(path))
+            except OSError as exc:
+                errors.append(category_for(exc))
     except OSError as exc:
         result['reason'] = str(exc)
-        errors.append(str(exc))
-    result['skipped'] = len(errors)
+        errors.append(category_for(exc))
+    for category in errors:
+        result['preserved'][category] += 1
+    # Recent files are outside the eligible cleanup set, not deletion failures.
+    result['skipped'] = sum(count for key, count in result['preserved'].items()
+                            if key != 'recent')
     return result
+
+
+
+PRESERVATION_LABELS = {
+    'in_use': 'Em uso',
+    'needs_permission': 'Sem permissão (pode exigir autorização)',
+    'safety': 'Preservados por segurança',
+    'recent': 'Modificados há menos de um dia',
+    'missing': 'Não encontrados na verificação',
+    'unverified': 'Não foi possível verificar',
+}
+
+
+def preservation_summary(results):
+    counts = {key: sum(r.get('preserved', {}).get(key, 0) for r in results)
+              for key in PRESERVATION_LABELS}
+    return '\n'.join(f'{label}: {counts[key]}'
+                     for key, label in PRESERVATION_LABELS.items())

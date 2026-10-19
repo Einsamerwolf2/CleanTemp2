@@ -1,0 +1,107 @@
+name: Build and sign CleanTemp
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: cleantemp-signing
+  cancel-in-progress: false
+jobs:
+  signed-candidate:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: windows-latest
+    environment: code-signing
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Check signing configuration
+        env:
+          SIGNPATH_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORG: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+        run: |
+          if (-not $env:SIGNPATH_TOKEN -or -not $env:SIGNPATH_ORG -or -not $env:SIGNPATH_PROJECT) {
+            throw 'SignPath approval and GitHub configuration are required. No unsigned release will be published.'
+          }
+      - name: Build complete native bundle
+        run: powershell -ExecutionPolicy Bypass -File packaging/build.ps1 -BundleOnly
+      - name: Locate Inno Setup
+        id: inno
+        run: |
+          $compiler = @('C:\Program Files (x86)\Inno Setup 6\ISCC.exe','C:\Program Files\Inno Setup 7\ISCC.exe') | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          if (-not $compiler) { throw 'Inno Setup compiler is required on the build runner.' }
+          "path=$compiler" >> $env:GITHUB_OUTPUT
+      - name: Prepare application and uninstaller
+        env:
+          INNO_COMPILER: ${{ steps.inno.outputs.path }}
+        run: powershell -ExecutionPolicy Bypass -File packaging/prepare-signpath.ps1 -InnoCompiler "$env:INNO_COMPILER"
+      - name: Upload native signing input
+        id: native
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleantemp-native-unsigned
+          path: dist/signpath/native-input/*
+          if-no-files-found: error
+      - name: Sign application and uninstaller
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: cleantemp-native
+          github-artifact-id: ${{ steps.native.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: '1800'
+          output-artifact-directory: dist/signpath/native-signed
+      - name: Compile installer with signed runtime and uninstaller
+        env:
+          INNO_COMPILER: ${{ steps.inno.outputs.path }}
+        run: powershell -ExecutionPolicy Bypass -File packaging/complete-signpath.ps1 -InnoCompiler "$env:INNO_COMPILER"
+      - name: Validate signed native executable
+        run: |
+          $program = Join-Path $pwd 'dist\CleanTemp\CleanTemp.exe'
+          foreach ($mode in @('--self-test-report','--functional-check-report')) {
+            $report = Join-Path $pwd ('dist\signed-' + $mode.TrimStart('-') + '.json')
+            $process = Start-Process -FilePath $program -ArgumentList @($mode,('"' + $report + '"')) -PassThru -WindowStyle Hidden
+            if (-not $process.WaitForExit(90000) -or $process.ExitCode -ne 0) { throw 'Signed native validation failed.' }
+          }
+      - name: Upload installer signing input
+        id: installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleantemp-installer-unsigned
+          path: dist/installer/CleanTemp-Setup-*-x64.exe
+          if-no-files-found: error
+      - name: Sign installer
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: cleantemp-installer
+          github-artifact-id: ${{ steps.installer.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: '1800'
+          output-artifact-directory: dist/signpath/installer-signed
+      - name: Verify signed installer
+        run: |
+          $installers = @(Get-ChildItem -LiteralPath dist/signpath/installer-signed -Filter '*.exe')
+          if ($installers.Count -ne 1) { throw 'Expected exactly one signed installer.' }
+          if ((Get-AuthenticodeSignature -LiteralPath $installers[0].FullName).Status -ne 'Valid') { throw 'Installer signature is invalid.' }
+          $hash = Get-FileHash -LiteralPath $installers[0].FullName -Algorithm SHA256
+          ($hash.Hash + '  ' + $installers[0].Name) | Set-Content dist/signpath/installer-signed/SHA256SUMS.txt -Encoding ascii
+      - name: Store signed candidate for installed UAC review
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleantemp-signed-candidate
+          path: dist/signpath/installer-signed/*
+          if-no-files-found: error

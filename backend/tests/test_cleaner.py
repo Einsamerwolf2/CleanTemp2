@@ -55,7 +55,7 @@ class CleanerTests(unittest.TestCase):
 
     def test_failed_deletion_is_not_counted(self):
         self.old_file('locked.tmp')
-        with patch.object(Path, 'unlink', side_effect=PermissionError):
+        with patch('cleaner.delete_file', side_effect=PermissionError):
             result = inspect(self.target, clean=True)
         self.assertEqual(result['size_bytes'], 0)
         self.assertEqual(result['skipped'], 1)
@@ -76,8 +76,14 @@ class CleanerTests(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
         self.assertEqual(client.get('/api/status', base_url=base, headers={'Origin':'https://example.com'}).status_code, 403)
         self.assertEqual(client.get('/api/status', base_url='http://example.com:5000').status_code, 403)
-        self.assertEqual(client.get('/', base_url=base).status_code, 200)
+        response = client.get('/', base_url=base)
+        try:
+            self.assertEqual(response.status_code, 200)
+        finally:
+            response.close()
 
 
 if __name__ == '__main__':
     unittest.main()
+
+

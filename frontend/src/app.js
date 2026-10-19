@@ -1,4 +1,4 @@
-﻿const $ = id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 let token = '', folders = [], busy = false;
 const size = bytes => {const units = ['B','KB','MB','GB','TB']; let i=0; while(bytes>=1024 && i<4){bytes/=1024;i++;} return `${bytes.toLocaleString('pt', {maximumFractionDigits:2})} ${units[i]}`;};
 function log(message){$('log').textContent = message;}
@@ -50,7 +50,8 @@ $('clean').addEventListener('click',async()=>{
   try{
     const data=await api('clean',{method:'POST',headers:{'Content-Type':'application/json','X-CleanTemp-Token':token},body:JSON.stringify({ids})});
     const result=`${data.deleted_files} arquivos apagados • ${size(data.freed_bytes)} removidos\n${data.skipped} arquivos ou pastas não puderam ser acessados ou limpos.\n`+data.results.map(r=>`${r.name}: ${r.file_count} arquivos, ${size(r.size_bytes)} removidos${r.reason?' — '+r.reason:''}`).join('\n');
-    log(result);
+    const labels={in_use:'Em uso',needs_permission:'Sem permissão',safety:'Preservados por segurança',recent:'Modificados há menos de um dia',missing:'Não encontrados na verificação',unverified:'Não foi possível verificar'};
+    log(result+'\n'+Object.entries(labels).map(([key,label])=>`${label}: ${data.preserved?.[key] || 0}`).join('\n'));
     try{await scan();}catch(e){log(result+'\nNão foi possível atualizar a análise: '+e.message);}
   }catch(e){log(e.message);}finally{busy=false;controls();}
 });
@@ -88,7 +89,7 @@ async function loadInfo(){
     for(const [key,[name,hosts]] of Object.entries(channels)){
       const url=info.support[key];
       if(!safeLink(url,hosts))continue;
-      const link=document.createElement('a');link.id=`support-${key}`;link.className='button';link.textContent=name;link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+      const link=document.createElement('a');link.id=`support-${key}`;link.className=`button support-${key}`;link.innerHTML=$(`support-${key}`).innerHTML;link.href=url;link.target='_blank';link.rel='noopener noreferrer';
       $(`support-${key}`).replaceWith(link);
     }
     if(info.github_repository){

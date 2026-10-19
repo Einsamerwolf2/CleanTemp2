@@ -21,15 +21,15 @@ class UpdateTests(unittest.TestCase):
 
     def test_new_release_and_cache(self):
         checker = UpdateChecker()
-        with patch('updates.urlopen', return_value=self.response('v1.1.0')) as fetch:
+        with patch('updates.urlopen', return_value=self.response('v99.0.0')) as fetch:
             result = checker.check('owner/CleanTemp')
             self.assertEqual(result['state'], 'available')
-            self.assertEqual(result['url'], 'https://github.com/owner/CleanTemp/releases/tag/v1.1.0')
+            self.assertEqual(result['url'], 'https://github.com/owner/CleanTemp/releases/tag/v99.0.0')
             self.assertEqual(checker.check('owner/CleanTemp'), result)
             self.assertEqual(fetch.call_count, 1)
 
     def test_current_or_older_release(self):
-        for tag in ('v1.0.0', 'v0.9.0'):
+        for tag in ('v1.1.0', 'v1.0.0'):
             with patch('updates.urlopen', return_value=self.response(tag)):
                 self.assertEqual(UpdateChecker().check('owner/repo')['state'], 'current')
 
@@ -38,7 +38,7 @@ class UpdateTests(unittest.TestCase):
         with patch('updates.urlopen', side_effect=URLError('offline')):
             self.assertEqual(checker.check('owner/repo')['state'], 'offline')
         checker.expires = 0
-        with patch('updates.urlopen', return_value=self.response('v1.2.0')):
+        with patch('updates.urlopen', return_value=self.response('v99.0.0')):
             self.assertEqual(checker.check('owner/repo')['state'], 'available')
 
     def test_no_repository_makes_no_request(self):
@@ -65,3 +65,4 @@ class UpdateTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

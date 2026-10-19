@@ -1,0 +1,10 @@
+-r backend/requirements.txt
+PyInstaller>=6.16,<7
+Pillow>=12,<13
+reportlab>=4,<6
+flake8>=7,<8
+
+# Reproducible PDF checks and UI review (development only).
+pypdf>=6,<7
+pypdfium2>=5,<6
+playwright>=1.60,<2

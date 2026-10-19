@@ -1,11 +1,11 @@
-﻿"""Public application settings. No credentials or personal data are stored here."""
+"""Public application settings. No credentials or personal data are stored here."""
 import json
-from pathlib import Path
+from resources import RESOURCE_ROOT
 import re
 from urllib.parse import urlsplit
 
-VERSION = '1.0.0'
-CONFIG_PATH = Path(__file__).resolve().parent.parent / 'app_config.json'
+VERSION = '1.4.0'
+CONFIG_PATH = RESOURCE_ROOT / 'app_config.json'
 
 
 def read_config():
@@ -32,3 +32,5 @@ def read_config():
             valid = False
         support[channel] = value if valid else ''
     return dict(version=VERSION, github_repository=repository, support=support)
+
+

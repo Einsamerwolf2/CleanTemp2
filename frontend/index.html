@@ -1,12 +1,39 @@
-﻿<!doctype html>
-<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CleanTemp</title><link rel="stylesheet" href="/assets/styles.css"><script src="/assets/app.js" defer></script></head>
-<body><header><div><h1>CleanTemp</h1><p>Mais espaço, sem complicação.</p></div><span id="status">Preparando…</span></header>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CleanTemp</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+  <script src="/assets/tour.js" defer></script>
+</head>
+<body>
+<header>
+  <div><h1><img class="app-icon" src="/brand/cleantemp.png" alt="">CleanTemp</h1><p>Mais espaço, sem complicação.</p></div>
+  <div class="header-tools"><span id="status">Preparando…</span><div class="actions"><button id="start-tour">Como usar</button><a class="button" id="guide-link" href="/help/primeiros-passos.pdf" target="_blank" rel="noopener">Guia em PDF</a></div></div>
+</header>
 <main>
 <section id="update-card" class="update-card" aria-live="polite"><div><h2>Seu CleanTemp</h2><p id="update-status">Você pode limpar o computador mesmo sem internet.</p></div><div class="actions"><button id="check-update">Verificar atualizações</button><a id="update-link" class="button primary" target="_blank" rel="noopener noreferrer" hidden>Ver nova versão</a></div></section>
-<section class="summary"><div><p>Espaço que pode ser liberado</p><strong id="total">—</strong><p id="count">Clique em Analisar para começar.</p></div><div class="actions"><button id="scan">Analisar</button><button id="clean" disabled>Limpar selecionados</button></div></section>
-<p class="notice">Só serão apagados arquivos temporários com mais de um dia. Arquivos em uso serão preservados. A exclusão é permanente.</p>
-<section><div class="list-head"><h2>O que deseja limpar?</h2><label><input id="all" type="checkbox" disabled> Selecionar disponíveis</label></div><div id="folders"><p class="empty">Analise o computador para ver o que pode ser limpo.</p></div></section>
-<section><h2>Como foi a limpeza</h2><pre id="log" role="status" aria-live="polite">Tudo pronto para começar.</pre></section>
-<section class="support"><h2>Precisa de ajuda?</h2><p>O CleanTemp fechou sozinho ou algo não funcionou? Fale com Edilson pelo canal que preferir.</p><div class="actions" id="support-links"><button id="support-discord">Discord</button><button id="support-telegram">Telegram</button><button id="support-whatsapp">WhatsApp</button></div><p id="support-status" role="status" aria-live="polite"></p><p class="small">O atendimento precisa de internet. Nenhuma mensagem é enviada sem você escolher.</p></section>
-</main><footer><span>CleanTemp • Criado por Edilson Enoque</span><a id="source-link" target="_blank" rel="noopener noreferrer" hidden>Conheça o projeto</a></footer></body></html>
+<section id="cleaning-summary" class="summary"><div><p>Espaço que pode ser liberado</p><strong id="total">—</strong><p id="count">Clique em Analisar para começar.</p></div><div class="actions"><button id="scan">Analisar</button><button id="clean" disabled>Limpar selecionados</button></div></section>
+<p class="notice">Só serão apagados arquivos temporários com mais de um dia. Arquivos abertos, protegidos ou que não possam ser verificados serão preservados. A exclusão é permanente.</p>
+<section id="folder-section"><div class="list-head"><h2>O que deseja limpar?</h2><label><input id="all" type="checkbox" disabled> Selecionar disponíveis</label></div><div id="folders"><p class="empty">Analise o computador para ver o que pode ser limpo.</p></div></section>
+<section id="results-section"><h2>Como foi a limpeza</h2><pre id="log" role="status" aria-live="polite">Tudo pronto para começar.</pre></section>
+<section id="support-section" class="support"><h2>Precisa de ajuda?</h2><p>O CleanTemp fechou sozinho ou algo não funcionou? Fale com Edilson pelo canal que preferir.</p><div class="actions" id="support-links"><button id="support-discord" class="support-discord"><img src="/assets/support-discord.png" alt="">Discord</button><button id="support-telegram" class="support-telegram"><img src="/assets/support-telegram.png" alt="">Telegram</button><button id="support-whatsapp" class="support-whatsapp"><img src="/assets/support-whatsapp.png" alt="">WhatsApp</button></div><p id="support-status" role="status" aria-live="polite"></p><p class="small">O atendimento precisa de internet. Nenhuma mensagem é enviada sem você escolher.</p><a class="text-link" href="/help/primeiros-passos.pdf?download=1">Guardar o guia de primeiros passos</a></section>
+</main>
+<footer><span>CleanTemp • Criado por Edilson Enoque</span><a href="/help/terms" target="_blank" rel="noopener">Termos de uso</a><a id="source-link" target="_blank" rel="noopener noreferrer" hidden>Conheça o projeto</a></footer>
+<dialog id="quick-tour" aria-labelledby="tour-title" aria-describedby="tour-description">
+  <div class="tour-heading"><span class="tour-brand">CleanTemp • Primeiros passos</span><button id="tour-skip" class="tour-skip">Saltar</button></div>
+  <p id="tour-progress" class="tour-progress" aria-live="polite"></p>
+  <div id="tour-symbol" class="tour-symbol" aria-hidden="true"></div>
+  <h2 id="tour-title" tabindex="-1"></h2>
+  <p id="tour-description"></p>
+  <div id="tour-preview" class="tour-preview" aria-hidden="true"></div>
+  <progress id="tour-bar" max="7" value="1" aria-label="Progresso do guia"></progress>
+  <div class="tour-controls"><button id="tour-prev">Anterior</button><button id="tour-next" class="primary">Próximo</button></div>
+  <p class="tour-note">Este guia apenas explica. Nenhum arquivo será apagado.</p>
+</dialog>
+</body>
+</html>
 

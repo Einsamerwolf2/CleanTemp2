@@ -10,7 +10,7 @@ if errorlevel 1 (
   .venv\Scripts\python.exe -m pip install -r backend\requirements.txt
   if errorlevel 1 goto erro
 )
-.venv\Scripts\python.exe backend\app.py
+.venv\Scripts\python.exe backend\desktop.py
 pause
 exit /b
 :erro
